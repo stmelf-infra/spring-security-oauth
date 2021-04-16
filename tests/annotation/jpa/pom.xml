@@ -31,7 +31,7 @@
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.security.oauth</groupId>
+			<groupId>de.bayern.stmelf</groupId>
 			<artifactId>spring-security-oauth2</artifactId>
 		</dependency>
 		<dependency>

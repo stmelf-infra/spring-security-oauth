@@ -1,19 +1,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.springframework.security.oauth</groupId>
+  <groupId>de.bayern.stmelf</groupId>
   <artifactId>spring-security-oauth-parent</artifactId>
-  <name>OAuth for Spring Security</name>
-  <description>Parent Project for OAuth Support for Spring Security</description>
+  <name>OAuth2 for Spring Security</name>
+  <description>Parent Project for OAuth2 Support for Spring Security</description>
   <packaging>pom</packaging>
-  <version>2.5.2.BUILD-SNAPSHOT</version>
+  <version>2.6.0.BUILD-SNAPSHOT</version>
   <url>https://docs.spring.io/spring-security/oauth</url>
 
   <modules>
-    <module>spring-security-oauth</module>
     <module>spring-security-oauth2</module>
-    <module>tests</module>
-    <module>samples</module>
-    <!--module>spring-security-jwt</module-->
+    <!--module>tests</module-->
+    <!--module>samples</module-->
+    <module>spring-security-jwt</module>
   </modules>
 
   <properties>
@@ -24,8 +23,8 @@
     <spring.data.redis.version>1.5.2.RELEASE</spring.data.redis.version>
     <redis.clients.version>2.6.3</redis.clients.version>
     <junit.version>4.12</junit.version>
-    <mockito.version>1.10.19</mockito.version>
-    <java.version>1.6</java.version>
+    <mockito.version>3.9.0</mockito.version>
+    <java.version>11</java.version>
   </properties>
 
   <scm>
@@ -38,13 +37,6 @@
     <system>JIRA</system>
     <url>https://opensource.atlassian.com/projects/spring/browse/SECOAUTH</url>
   </issueManagement>
-  <mailingLists>
-    <mailingList>
-      <name>Spring Security OAuth Forum</name>
-      <post>https://forum.springframework.org/forumdisplay.php?f=79</post>
-      <archive>https://forum.springframework.org/forumdisplay.php?f=79</archive>
-    </mailingList>
-  </mailingLists>
   <ciManagement>
     <system>Bamboo</system>
     <url>https://build.springframework.org/bamboo/browse/SECOAUTH</url>
@@ -70,159 +62,7 @@
   </developers>
 
   <profiles>
-    <profile>
-      <id>staging</id>
-      <properties>
-        <dist.staging>/${java.io.tmpdir}/spring-security-oauth/dist</dist.staging>
-      </properties>
-      <distributionManagement>
-        <site>
-          <id>spring-site-staging</id>
-          <url>file:///${java.io.tmpdir}/spring-security-oauth/docs/${project.version}</url>
-        </site>
-        <repository>
-          <id>spring-milestone-staging</id>
-          <url>file:///${java.io.tmpdir}/spring-security-oauth/milestone</url>
-        </repository>
-        <snapshotRepository>
-          <id>spring-snapshot-staging</id>
-          <url>file:///${java.io.tmpdir}/spring-security-oauth/snapshot</url>
-        </snapshotRepository>
-      </distributionManagement>
-    </profile>
-    <profile>
-      <id>bootstrap</id>
-      <repositories>
-        <repository>
-          <id>repo.spring.io-milestone</id>
-          <name>Spring Framework Milestone Repository</name>
-          <url>https://repo.spring.io/libs-milestone-local</url>
-        </repository>
-        <repository>
-          <id>repo.spring.io-release</id>
-          <name>Spring Framework Release Repository</name>
-          <url>https://repo.spring.io/libs-release-local</url>
-        </repository>
-        <repository>
-          <id>repo.spring.io-snapshot</id>
-          <name>Spring Framework Maven Snapshot Repository</name>
-          <url>https://repo.spring.io/libs-snapshot-local</url>
-          <snapshots><enabled>true</enabled></snapshots>
-        </repository>
-        <repository>
-          <id>oauth.googlecode.net</id>
-          <url>https://oauth.googlecode.com/svn/code/maven/</url>
-        </repository>
-      </repositories>
-    </profile>
-    <profile>
-      <id>milestone</id>
-      <distributionManagement>
-            <repository>
-              <id>repo.spring.io</id>
-              <name>Spring Milestone Repository</name>
-              <url>https://repo.spring.io/libs-milestone-local</url>
-            </repository>
-      </distributionManagement>
-    </profile>
-	<profile>
-	  <id>bintray</id>
-	  <distributionManagement>
-		<repository>
-		  <id>bintray</id>
-		  <name>Jcenter Repository</name>
-		  <url>https://api.bintray.com/maven/spring/jars/org.springframework.security.oauth</url>
-		</repository>
-	  </distributionManagement>
-	</profile>
-    <profile>
-      <id>central</id>
-      <distributionManagement>
-        <snapshotRepository>
-          <id>sonatype-nexus-snapshots</id>
-          <name>Sonatype Nexus Snapshots</name>
-          <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-        </snapshotRepository>
-        <repository>
-          <id>sonatype-nexus-staging</id>
-          <name>Nexus Release Repository</name>
-          <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
-      </distributionManagement>
-      <build>
-        <plugins>
-          <plugin>
-            <artifactId>maven-gpg-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>sign-artifacts</id>
-                <phase>verify</phase>
-                <goals>
-                  <goal>sign</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-    <profile>
-      <id>spring5</id>
-        <properties>
-            <spring.version>5.0.16.RELEASE</spring.version>
-            <spring.security.version>5.0.3.RELEASE</spring.security.version>
-            <spring.data.redis.version>2.0.5.RELEASE</spring.data.redis.version>
-            <redis.clients.version>2.9.0</redis.clients.version>
-        </properties>
-        <repositories>
-            <repository>
-                <id>repo.spring.io-milestone</id>
-                <name>Spring Framework Milestone Repository</name>
-                <url>https://repo.spring.io/libs-milestone-local</url>
-            </repository>
-            <repository>
-                <id>repo.spring.io-snapshot</id>
-                <name>Spring Framework Maven Snapshot Repository</name>
-                <url>https://repo.spring.io/libs-snapshot-local</url>
-                <snapshots><enabled>true</enabled></snapshots>
-            </repository>
-        </repositories>
-        <build>
-			<plugins>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-checkstyle-plugin</artifactId>
-					<version>3.1.1</version>
-					<dependencies>
-						<dependency>
-							<groupId>com.puppycrawl.tools</groupId>
-							<artifactId>checkstyle</artifactId>
-							<version>8.31</version>
-						</dependency>
-						<dependency>
-							<groupId>io.spring.nohttp</groupId>
-							<artifactId>nohttp-checkstyle</artifactId>
-							<version>0.0.3.RELEASE</version>
-						</dependency>
-					</dependencies>
-					<configuration>
-						<configLocation>${maven.multiModuleProjectDirectory}/etc/nohttp/checkstyle.xml</configLocation>
-						<includes>src/**/*,*</includes>
-						<sourceDirectories>
-							<sourceDirectory>./</sourceDirectory>
-						</sourceDirectories>
-					</configuration>
-					<executions>
-						<execution>
-							<goals>
-								<goal>check</goal>
-							</goals>
-						</execution>
-					</executions>
-				</plugin>
-			</plugins>
-        </build>
-    </profile>
+
     <profile>
         <id>default</id>
         <activation>
@@ -230,58 +70,10 @@
         </activation>
         <build>
             <plugins>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>animal-sniffer-maven-plugin</artifactId>
-                    <version>1.6</version>
-                    <configuration>
-                        <signature>
-                            <groupId>org.codehaus.mojo.signature</groupId>
-                            <artifactId>java16</artifactId>
-                            <version>1.0</version>
-                        </signature>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <id>enforce-java-6</id>
-                            <phase>test</phase>
-                            <goals>
-                                <goal>check</goal>
-                            </goals>
-                            <configuration>
-                                <ignores>
-                                    <!--allow dependencies on internal Sun APIs for now. Someday fix these.... -->
-                                    <ignore>sun.net.www.protocol.http.*</ignore>
-                                    <ignore>sun.net.www.protocol.https.*</ignore>
-                                </ignores>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
             </plugins>
         </build>
     </profile>
-    <profile>
-      <id>tests-exclude-redis</id>
-      <build>
-          <plugins>
-              <plugin>
-                  <groupId>org.apache.maven.plugins</groupId>
-                  <artifactId>maven-surefire-plugin</artifactId>
-                  <configuration>
-                      <skip>${skipTests}</skip>
-                      <includes>
-                          <include>**/*Tests.java</include>
-                      </includes>
-                      <excludes>
-                          <exclude>**/RedisTokenStorePrefixTests.java</exclude>
-                          <exclude>**/RedisTokenStoreTests.java</exclude>
-                      </excludes>
-                  </configuration>
-              </plugin>
-          </plugins>
-      </build>
-    </profile>
+
   </profiles>
 
   <dependencyManagement>
@@ -390,6 +182,16 @@
 			<artifactId>commons-codec</artifactId>
 			<version>${commons-codec.version}</version>
 		</dependency>
+		<dependency>
+		    <groupId>javax.xml.bind</groupId>
+		    <artifactId>jaxb-api</artifactId>
+		    <version>2.3.1</version>
+		</dependency>
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+            <version>1.3.2</version>
+        </dependency>
 
     </dependencies>
   </dependencyManagement>
@@ -399,10 +201,11 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.3.2</version>
+        <version>3.8.0</version>
         <configuration>
           <source>${java.version}</source>
           <target>${java.version}</target>
+          <release>${java.version}</release>
         </configuration>
       </plugin>
       <plugin>
@@ -412,22 +215,6 @@
         <executions>
           <execution>
             <id>attach-sources</id>
-            <phase>package</phase>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.9.1</version>
-        <configuration>
-          <quiet>true</quiet>
-        </configuration>
-        <executions>
-          <execution>
-            <id>javadoc</id>
             <phase>package</phase>
             <goals>
               <goal>jar</goal>
@@ -479,7 +266,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>2.20</version>
+          <version>2.22.0</version>
           <configuration>
             <skip>${skipTests}</skip>
             <includes>
@@ -487,7 +274,7 @@
             </includes>
             <forkCount>3</forkCount>
             <reuseForks>true</reuseForks>
-            <argLine>-Xmx1024m -XX:MaxPermSize=256m</argLine>
+            <argLine>-Xmx1024m --illegal-access=permit --add-opens java.xml/jdk.xml.internal=ALL-UNNAMED</argLine>
           </configuration>
         </plugin>
 	  </plugins>
@@ -517,37 +304,6 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>jdepend-maven-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <reportSets>
-          <reportSet>
-            <id>html</id>
-            <reports>
-              <report>javadoc</report>
-            </reports>
-          </reportSet>
-        </reportSets>
-        <configuration>
-          <aggregate>true</aggregate>
-          <breakiterator>true</breakiterator>
-          <links>
-            <link>https://java.sun.com/j2ee/1.4/docs/api</link>
-            <link>https://java.sun.com/j2se/1.5.0/docs/api</link>
-            <link>https://jakarta.apache.org/commons/collections/apidocs-COLLECTIONS_3_0/</link>
-            <link>https://jakarta.apache.org/commons/dbcp/apidocs/</link>
-            <link>https://jakarta.apache.org/commons/fileupload/apidocs/</link>
-            <link>https://jakarta.apache.org/commons/httpclient/apidocs/</link>
-            <link>https://jakarta.apache.org/commons/pool/apidocs/</link>
-            <link>https://jakarta.apache.org/commons/logging/apidocs/</link>
-            <link>http://junit.sourceforge.net/javadoc/</link>
-            <link>https://logging.apache.org/log4j/docs/api/</link>
-            <link>https://jakarta.apache.org/regexp/apidocs/</link>
-            <link>https://jakarta.apache.org/velocity/api/</link>
-            <link>https://docs.spring.io/spring/docs/2.5.x/api/</link>
-          </links>
-          <excludePackageNames>example</excludePackageNames>
-        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
