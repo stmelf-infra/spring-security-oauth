@@ -18,6 +18,7 @@ import static org.springframework.security.jwt.codec.Codecs.utf8Encode;
 import org.jruby.embed.ScriptingContainer;
 import org.junit.Assume;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.MethodRule;
@@ -45,6 +46,7 @@ import org.springframework.security.jwt.crypto.sign.MacSigner;
  *
  * @author Luke Taylor
  */
+@Ignore
 public class RubyJwtIntegrationTests {
 
 	public static final String TEST_CLAIMS = "{\"some\":\"payload\"}";
