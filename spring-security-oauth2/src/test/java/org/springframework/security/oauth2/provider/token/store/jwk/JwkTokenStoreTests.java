@@ -129,7 +129,7 @@ public class JwkTokenStoreTests {
 		when(jwkDefinitionHolder.getSignatureVerifier()).thenReturn(mock(SignatureVerifier.class));
 
 		JwkDefinitionSource jwkDefinitionSource = mock(JwkDefinitionSource.class);
-		when(jwkDefinitionSource.getDefinitionLoadIfNecessary(anyString(), anyString())).thenReturn(jwkDefinitionHolder);
+		when(jwkDefinitionSource.getDefinitionLoadIfNecessary(anyString(), isNull())).thenReturn(jwkDefinitionHolder);
 
 		JwkVerifyingJwtAccessTokenConverter jwtVerifyingAccessTokenConverter =
 				new JwkVerifyingJwtAccessTokenConverter(jwkDefinitionSource);
@@ -167,14 +167,14 @@ public class JwkTokenStoreTests {
 		JwkTokenStore spy = spy(this.jwkTokenStore);
 		JwtTokenStore delegate = mock(JwtTokenStore.class);
 
-		doNothing().when(delegate).removeAccessToken(any(OAuth2AccessToken.class));
+		doNothing().when(delegate).removeAccessToken(isNull());
 
 		Field field = ReflectionUtils.findField(spy.getClass(), "delegate");
 		field.setAccessible(true);
 		ReflectionUtils.setField(field, spy, delegate);
 
-		spy.removeAccessToken(any(OAuth2AccessToken.class));
-		verify(delegate).removeAccessToken(any(OAuth2AccessToken.class));
+		spy.removeAccessToken(isNull());
+		verify(delegate).removeAccessToken(any());
 	}
 
 	@Test

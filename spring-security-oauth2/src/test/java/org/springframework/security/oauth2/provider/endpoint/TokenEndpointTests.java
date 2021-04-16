@@ -98,7 +98,7 @@ public class TokenEndpointTests {
 	@Test
 	public void testGetAccessTokenWithNoClientId() throws HttpRequestMethodNotSupportedException {
 
-		HashMap<String, String> parameters = new HashMap<String, String>();
+		HashMap<String, String> parameters = new HashMap<>();
 		parameters.put(OAuth2Utils.GRANT_TYPE, "authorization_code");
 
 		OAuth2AccessToken expectedToken = new DefaultOAuth2AccessToken("FOO");
@@ -106,7 +106,7 @@ public class TokenEndpointTests {
 				expectedToken);
 		@SuppressWarnings("unchecked")
 		Map<String, String> anyMap = Mockito.any(Map.class);
-		when(authorizationRequestFactory.createTokenRequest(anyMap, Mockito.any(ClientDetails.class))).thenReturn(
+		when(authorizationRequestFactory.createTokenRequest(anyMap, Mockito.isNull(ClientDetails.class))).thenReturn(
 				createFromParameters(parameters));
 
 		clientAuthentication = new UsernamePasswordAuthenticationToken(null, null,
@@ -152,12 +152,12 @@ public class TokenEndpointTests {
 
     @Test(expected = HttpRequestMethodNotSupportedException.class)
     public void testGetAccessTokenWithUnsupportedRequestParameters() throws HttpRequestMethodNotSupportedException {
-        endpoint.getAccessToken(clientAuthentication, new HashMap<String, String>());
+        endpoint.getAccessToken(clientAuthentication, new HashMap<>());
     }
 
 	@Test
 	public void testGetAccessTokenWithSupportedRequestParametersNotPost() throws HttpRequestMethodNotSupportedException {
-		endpoint.setAllowedRequestMethods(new HashSet<HttpMethod>(Arrays.asList(HttpMethod.GET)));
+		endpoint.setAllowedRequestMethods(new HashSet<>(Arrays.asList(HttpMethod.GET)));
 		HashMap<String, String> parameters = new HashMap<String, String>();
 		parameters.put("client_id", clientId);
 		parameters.put("scope", "read");
@@ -169,7 +169,7 @@ public class TokenEndpointTests {
 				expectedToken);
 		@SuppressWarnings("unchecked")
 		Map<String, String> anyMap = Mockito.any(Map.class);
-		when(authorizationRequestFactory.createTokenRequest(anyMap, Mockito.any(ClientDetails.class))).thenReturn(
+		when(authorizationRequestFactory.createTokenRequest(anyMap, Mockito.isNull(ClientDetails.class))).thenReturn(
 				createFromParameters(parameters));
 
 		ResponseEntity<OAuth2AccessToken> response = endpoint.getAccessToken(clientAuthentication, parameters);
