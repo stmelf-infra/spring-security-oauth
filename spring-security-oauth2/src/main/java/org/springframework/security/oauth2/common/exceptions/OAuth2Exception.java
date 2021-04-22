@@ -6,10 +6,7 @@ import java.util.TreeMap;
 
 /**
  * Base exception for OAuth 2 exceptions.
- *
- * <p>
- * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
- *
+ * 
  * @author Ryan Heaton
  * @author Rob Winch
  * @author Dave Syer
@@ -17,7 +14,6 @@ import java.util.TreeMap;
 @SuppressWarnings("serial")
 @com.fasterxml.jackson.databind.annotation.JsonSerialize(using = OAuth2ExceptionJackson2Serializer.class)
 @com.fasterxml.jackson.databind.annotation.JsonDeserialize(using = OAuth2ExceptionJackson2Deserializer.class)
-@Deprecated
 public class OAuth2Exception extends RuntimeException {
 
 	public static final String ERROR = "error";

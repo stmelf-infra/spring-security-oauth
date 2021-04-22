@@ -38,14 +38,10 @@ import org.springframework.util.Assert;
 
 /**
  * A user approval handler that remembers approval decisions by consulting existing tokens.
- *
- * <p>
- * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
- *
+ * 
  * @author Dave Syer
  * 
  */
-@Deprecated
 public class TokenStoreUserApprovalHandler implements UserApprovalHandler, InitializingBean {
 
 	private static Log logger = LogFactory.getLog(TokenStoreUserApprovalHandler.class);

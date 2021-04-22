@@ -13,12 +13,8 @@
 package org.springframework.security.jwt;
 
 /**
- * <p>
- * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
- *
  * @author Luke Taylor
  */
-@Deprecated
 public interface BinaryFormat {
 	byte[] bytes();
 }

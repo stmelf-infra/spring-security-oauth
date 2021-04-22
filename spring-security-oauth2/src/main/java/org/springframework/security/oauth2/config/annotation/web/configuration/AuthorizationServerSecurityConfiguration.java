@@ -34,9 +34,6 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * <p>
- * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
- *
  * @author Rob Winch
  * @author Dave Syer
  * 
@@ -44,7 +41,6 @@ import java.util.List;
 @Configuration
 @Order(0)
 @Import({ ClientDetailsServiceConfiguration.class, AuthorizationServerEndpointsConfiguration.class })
-@Deprecated
 public class AuthorizationServerSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	@Autowired
