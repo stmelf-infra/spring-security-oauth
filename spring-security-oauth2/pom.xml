@@ -123,7 +123,7 @@
         </dependency>
 
         <dependency>
-            <groupId>org.springframework.security</groupId>
+            <groupId>de.bayern.stmelf</groupId>
             <artifactId>spring-security-jwt</artifactId>
             <optional>true</optional>
         </dependency>
