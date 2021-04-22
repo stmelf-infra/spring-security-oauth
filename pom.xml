@@ -19,29 +19,19 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <commons-codec.version>1.14</commons-codec.version>
-        <spring.version>4.3.30.RELEASE</spring.version>
-        <spring.security.version>4.2.20.RELEASE</spring.security.version>
-        <spring.data.redis.version>1.5.2.RELEASE</spring.data.redis.version>
-        <redis.clients.version>2.6.3</redis.clients.version>
+        <spring.version>5.3.3</spring.version>
+        <spring.security.version>5.4.4</spring.security.version>
         <junit.version>4.12</junit.version>
         <mockito.version>3.9.0</mockito.version>
         <java.version>11</java.version>
     </properties>
 
     <scm>
-        <url>https://github.com/SpringSource/spring-security-oauth</url>
-        <connection>scm:git:git://github.com/SpringSource/spring-security-oauth.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com/SpringSource/spring-security-oauth.git</developerConnection>
+        <url>https://github.com/stmelf-infra/spring-security-oauth</url>
+        <connection>scm:git:git://github.com/stmelf-infra/spring-security-oauth.git</connection>
+        <developerConnection>scm:git:ssh://git@ggithub.com/stmelf-infra/spring-security-oauth.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
-    <issueManagement>
-        <system>JIRA</system>
-        <url>https://opensource.atlassian.com/projects/spring/browse/SECOAUTH</url>
-    </issueManagement>
-    <ciManagement>
-        <system>Bamboo</system>
-        <url>https://build.springframework.org/bamboo/browse/SECOAUTH</url>
-    </ciManagement>
     <licenses>
         <license>
             <name>Apache 2.0</name>
@@ -312,26 +302,4 @@
             </plugin>
         </plugins>
     </reporting>
-
-    <distributionManagement>
-
-        <site>
-            <id>static.spring.io</id>
-            <url>scp://docs.af.pivotal.io/var/www/domains/spring.io/docs/htdocs/spring-security/oauth/site/docs/${project.version}</url>
-        </site>
-
-        <repository>
-            <id>repo.spring.io</id>
-            <name>Spring Release Repository</name>
-            <url>https://repo.spring.io/libs-release-local</url>
-        </repository>
-
-        <snapshotRepository>
-            <id>repo.spring.io</id>
-            <name>Spring Snapshot Repository</name>
-            <url>https://repo.spring.io/libs-snapshot-local</url>
-        </snapshotRepository>
-
-    </distributionManagement>
-
 </project>
