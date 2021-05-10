@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>de.bayern.stmelf</groupId>
     <artifactId>spring-security-oauth-parent</artifactId>
-    <name>OAuth2 for Spring Security</name>
+    <name>OAuth2 for Spring Security Parent POM</name>
     <description>Parent Project for OAuth2 Support for Spring Security</description>
     <packaging>pom</packaging>
     <version>2.6.0.BUILD-SNAPSHOT</version>
@@ -51,21 +51,6 @@
             <email>dsyer@vmware.com</email>
         </developer>
     </developers>
-
-    <profiles>
-
-        <profile>
-            <id>default</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <build>
-                <plugins>
-                </plugins>
-            </build>
-        </profile>
-
-    </profiles>
 
     <dependencyManagement>
         <dependencies>
@@ -270,14 +255,18 @@
                 </plugin>
             </plugins>
         </pluginManagement>
-        <extensions>
-            <extension>
-                <groupId>org.springframework.build</groupId>
-                <artifactId>aws-maven</artifactId>
-                <version>5.0.0.RELEASE</version>
-            </extension>
-        </extensions>
     </build>
+
+    <distributionManagement>
+        <repository>
+            <id>stmelf-releases</id>
+            <url>${repository.release.url}</url>
+        </repository>
+        <snapshotRepository>
+            <id>stmelf-snapshots</id>
+            <url>${repository.snapshot.url}</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <reporting>
         <excludeDefaults>true</excludeDefaults>

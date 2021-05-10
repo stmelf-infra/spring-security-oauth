@@ -61,6 +61,17 @@
         </plugins>
     </build>
 
+    <distributionManagement>
+        <repository>
+            <id>stmelf-releases</id>
+            <url>${repository.release.url}</url>
+        </repository>
+        <snapshotRepository>
+            <id>stmelf-snapshots</id>
+            <url>${repository.snapshot.url}</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <dependencies>
         <dependency>
             <groupId>javax.servlet</groupId>

@@ -76,13 +76,6 @@
                 </plugin>
             </plugins>
         </pluginManagement>
-        <extensions>
-            <extension>
-                <groupId>org.springframework.build</groupId>
-                <artifactId>aws-maven</artifactId>
-                <version>5.0.0.RELEASE</version>
-            </extension>
-        </extensions>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -111,28 +104,16 @@
     </build>
 
     <distributionManagement>
-
-        <site>
-            <id>static.spring.io</id>
-            <url>scp://docs.af.pivotal.io/var/www/domains/spring.io/docs/htdocs/spring-security/oauth/site/docs/${project.version}</url>
-        </site>
-
         <repository>
-            <id>repo.spring.io</id>
-            <name>Spring Release Repository</name>
-            <url>https://repo.spring.io/libs-release-local</url>
+            <id>stmelf-releases</id>
+            <url>${repository.release.url}</url>
         </repository>
-
         <snapshotRepository>
-            <id>repo.spring.io</id>
-            <name>Spring Snapshot Repository</name>
-            <url>https://repo.spring.io/libs-snapshot-local</url>
+            <id>stmelf-snapshots</id>
+            <url>${repository.snapshot.url}</url>
         </snapshotRepository>
-
     </distributionManagement>
 
-    <profiles>
-    </profiles>
 
     <scm>
         <url>https://github.com/spring-projects/spring-security-oauth</url>
