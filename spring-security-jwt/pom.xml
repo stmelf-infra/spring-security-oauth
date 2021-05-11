@@ -5,7 +5,7 @@
 
     <groupId>de.bayern.stmelf</groupId>
     <artifactId>spring-security-jwt</artifactId>
-    <version>1.1.2.BUILD-SNAPSHOT</version>
+    <version>1.1.2</version>
     <packaging>jar</packaging>
     <name>Spring Security JWT Library</name>
 
