@@ -61,8 +61,14 @@ public class BaseClientDetails implements ClientDetails {
 	@com.fasterxml.jackson.annotation.JsonProperty("refresh_token_validity")
 	private Integer refreshTokenValiditySeconds;
 
+	@com.fasterxml.jackson.annotation.JsonProperty("auth_code_validity")
+	private Integer authCodeValiditySeconds;
+
+	@com.fasterxml.jackson.annotation.JsonProperty("token_endpoint_auth_method")
+	private TokenEndpointAuthMethod tokenEndpointAuthMethod = TokenEndpointAuthMethod.client_secret_basic;
+
 	@com.fasterxml.jackson.annotation.JsonIgnore
-	private Map<String, Object> additionalInformation = new LinkedHashMap<String, Object>();
+	private Map<String, Object> additionalInformation = new LinkedHashMap<>();
 
 	public BaseClientDetails() {
 	}
@@ -72,6 +78,8 @@ public class BaseClientDetails implements ClientDetails {
 		setAccessTokenValiditySeconds(prototype.getAccessTokenValiditySeconds());
 		setRefreshTokenValiditySeconds(prototype
 				.getRefreshTokenValiditySeconds());
+		setAuthCodeValiditySeconds(prototype.getAuthCodeValiditySeconds());
+		setTokenEndpointAuthMethod(prototype.getTokenEndpointAuthMethod());
 		setAuthorities(prototype.getAuthorities());
 		setAuthorizedGrantTypes(prototype.getAuthorizedGrantTypes());
 		setClientId(prototype.getClientId());
@@ -83,12 +91,20 @@ public class BaseClientDetails implements ClientDetails {
 
 	public BaseClientDetails(String clientId, String resourceIds,
 			String scopes, String grantTypes, String authorities) {
-		this(clientId, resourceIds, scopes, grantTypes, authorities, null);
+		this(clientId, resourceIds, scopes, grantTypes, authorities, null,
+				TokenEndpointAuthMethod.client_secret_basic);
+	}
+
+	public BaseClientDetails(String clientId, String resourceIds,
+							 String scopes, String grantTypes, String authorities,
+							 String redirectUris) {
+		this(clientId, resourceIds, scopes, grantTypes, authorities, redirectUris,
+				TokenEndpointAuthMethod.client_secret_basic);
 	}
 
 	public BaseClientDetails(String clientId, String resourceIds,
 			String scopes, String grantTypes, String authorities,
-			String redirectUris) {
+			String redirectUris, TokenEndpointAuthMethod tokenEndpointAuthMethod) {
 
 		this.clientId = clientId;
 
@@ -124,6 +140,7 @@ public class BaseClientDetails implements ClientDetails {
 			this.registeredRedirectUris = StringUtils
 					.commaDelimitedListToSet(redirectUris);
 		}
+		this.tokenEndpointAuthMethod = tokenEndpointAuthMethod;
 	}
 
 	@com.fasterxml.jackson.annotation.JsonIgnore
@@ -258,6 +275,26 @@ public class BaseClientDetails implements ClientDetails {
 		this.refreshTokenValiditySeconds = refreshTokenValiditySeconds;
 	}
 
+	@com.fasterxml.jackson.annotation.JsonIgnore
+	@Override
+	public Integer getAuthCodeValiditySeconds() {
+		return authCodeValiditySeconds;
+	}
+
+	public void setAuthCodeValiditySeconds(Integer authCodeValiditySeconds) {
+		this.authCodeValiditySeconds = authCodeValiditySeconds;
+	}
+
+	@com.fasterxml.jackson.annotation.JsonIgnore
+	@Override
+	public TokenEndpointAuthMethod getTokenEndpointAuthMethod() {
+		return tokenEndpointAuthMethod;
+	}
+
+	public void setTokenEndpointAuthMethod(TokenEndpointAuthMethod tokenEndpointAuthMethod) {
+		this.tokenEndpointAuthMethod = tokenEndpointAuthMethod;
+	}
+
 	public void setAdditionalInformation(Map<String, ?> additionalInformation) {
 		this.additionalInformation = new LinkedHashMap<String, Object>(
 				additionalInformation);
@@ -285,6 +322,12 @@ public class BaseClientDetails implements ClientDetails {
 				* result
 				+ ((refreshTokenValiditySeconds == null) ? 0
 						: refreshTokenValiditySeconds);
+		result = prime
+				* result
+				+ ((authCodeValiditySeconds == null) ? 0
+				: authCodeValiditySeconds);
+		result = prime * result
+				+ ((tokenEndpointAuthMethod == null) ? 0 : tokenEndpointAuthMethod.hashCode());
 		result = prime * result
 				+ ((authorities == null) ? 0 : authorities.hashCode());
 		result = prime
@@ -324,6 +367,16 @@ public class BaseClientDetails implements ClientDetails {
 			if (other.refreshTokenValiditySeconds != null)
 				return false;
 		} else if (!refreshTokenValiditySeconds.equals(other.refreshTokenValiditySeconds))
+			return false;
+		if (authCodeValiditySeconds == null) {
+			if (other.authCodeValiditySeconds != null)
+				return false;
+		} else if (!authCodeValiditySeconds.equals(other.authCodeValiditySeconds))
+			return false;
+		if (tokenEndpointAuthMethod == null) {
+			if (other.tokenEndpointAuthMethod != null)
+				return false;
+		} else if (!tokenEndpointAuthMethod.equals(other.tokenEndpointAuthMethod))
 			return false;
 		if (authorities == null) {
 			if (other.authorities != null)
@@ -376,9 +429,10 @@ public class BaseClientDetails implements ClientDetails {
 				+ authorizedGrantTypes + ", registeredRedirectUris="
 				+ registeredRedirectUris + ", authorities=" + authorities
 				+ ", accessTokenValiditySeconds=" + accessTokenValiditySeconds
-				+ ", refreshTokenValiditySeconds="
-				+ refreshTokenValiditySeconds + ", additionalInformation="
-				+ additionalInformation + "]";
+				+ ", refreshTokenValiditySeconds="  + refreshTokenValiditySeconds
+				+ ", authCodeValiditySeconds=" + authCodeValiditySeconds
+				+ ", tokenEndpointAuthMethod=" + tokenEndpointAuthMethod
+				+ ", additionalInformation=" + additionalInformation + "]";
 	}
 
 }

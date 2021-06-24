@@ -120,7 +120,7 @@ public class DefaultTokenServicesTests {
 	}
 
 	private TokenRequest createMockTokenRequest(String clientId) {
-		return new TokenRequest(null, clientId, null, null);
+		return new TokenRequest(null, clientId, null, null, null);
 	}
 
 	private OAuth2Request createMockOAuth2Request(String clientId) {

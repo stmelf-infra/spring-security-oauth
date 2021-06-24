@@ -16,20 +16,28 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.security.oauth2.common.util.SerializationStrategy;
 import org.springframework.security.oauth2.common.util.SerializationUtils;
 import org.springframework.security.oauth2.common.util.WhitelistedSerializationStrategy;
+import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.RequestTokenFactory;
+import org.springframework.security.oauth2.provider.client.BaseClientDetails;
+import org.springframework.security.oauth2.provider.client.JdbcClientDetailsService;
 
 public class JdbcAuthorizationCodeServicesTests extends AuthorizationCodeServicesBaseTests {
 	private JdbcAuthorizationCodeServices authorizationCodeServices;
-
+	private JdbcClientDetailsService detailsService;
 	private EmbeddedDatabase db;
 
 	@Before
 	public void setUp() throws Exception {
 		// creates a HSQL in-memory db populated from default scripts classpath:schema.sql and classpath:data.sql
 		db = new EmbeddedDatabaseBuilder().addDefaultScripts().build();
-		authorizationCodeServices = new JdbcAuthorizationCodeServices(db);
+		detailsService = new JdbcClientDetailsService(db);
+		authorizationCodeServices = new JdbcAuthorizationCodeServices(db, detailsService);
+		BaseClientDetails client = new BaseClientDetails("id", "resource", "profile", "email", "roles",
+				"https://localhost:8443");
+		client.setAuthCodeValiditySeconds(10);
+		detailsService.addClientDetails(client);
 	}
 
 	@After

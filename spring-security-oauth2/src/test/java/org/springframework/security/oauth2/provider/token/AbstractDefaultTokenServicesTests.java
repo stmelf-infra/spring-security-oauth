@@ -104,7 +104,7 @@ public abstract class AbstractDefaultTokenServicesTests {
 		ExpiringOAuth2RefreshToken expectedExpiringRefreshToken = (ExpiringOAuth2RefreshToken) getTokenServices()
 				.createAccessToken(createAuthentication()).getRefreshToken();
 		TokenRequest tokenRequest = new TokenRequest(Collections.singletonMap("client_id", "wrong"), "wrong", null,
-				null);
+				null, null);
 		OAuth2AccessToken refreshedAccessToken = getTokenServices()
 				.refreshAccessToken(expectedExpiringRefreshToken.getValue(), tokenRequest);
 		assertEquals("[read]", refreshedAccessToken.getScope().toString());
@@ -115,7 +115,7 @@ public abstract class AbstractDefaultTokenServicesTests {
 		ExpiringOAuth2RefreshToken expectedExpiringRefreshToken = (ExpiringOAuth2RefreshToken) getTokenServices()
 				.createAccessToken(createAuthentication()).getRefreshToken();
 		TokenRequest tokenRequest = new TokenRequest(Collections.singletonMap("client_id", "id"), "id",
-				Collections.singleton("read"), null);
+				Collections.singleton("read"), null, null);
 		OAuth2AccessToken refreshedAccessToken = getTokenServices()
 				.refreshAccessToken(expectedExpiringRefreshToken.getValue(), tokenRequest);
 		assertEquals("[read]", refreshedAccessToken.getScope().toString());
@@ -126,7 +126,7 @@ public abstract class AbstractDefaultTokenServicesTests {
 		ExpiringOAuth2RefreshToken expectedExpiringRefreshToken = (ExpiringOAuth2RefreshToken) getTokenServices()
 				.createAccessToken(createAuthentication()).getRefreshToken();
 		TokenRequest tokenRequest = new TokenRequest(Collections.singletonMap("client_id", "id"), "id",
-				Collections.singleton("read"), null);
+				Collections.singleton("read"), null, null);
 		final AtomicBoolean called = new AtomicBoolean(false);
 		getTokenServices().setTokenEnhancer(new TokenEnhancer() {
 			@Override
@@ -193,7 +193,8 @@ public abstract class AbstractDefaultTokenServicesTests {
 	public void testRefreshedTokenHasScopes() throws Exception {
 		ExpiringOAuth2RefreshToken expectedExpiringRefreshToken = (ExpiringOAuth2RefreshToken) getTokenServices()
 				.createAccessToken(createAuthentication()).getRefreshToken();
-		TokenRequest tokenRequest = new TokenRequest(Collections.singletonMap("client_id", "id"), "id", null, null);
+		TokenRequest tokenRequest = new TokenRequest(Collections.singletonMap("client_id", "id"), "id",
+				null, null, null);
 		OAuth2AccessToken refreshedAccessToken = getTokenServices()
 				.refreshAccessToken(expectedExpiringRefreshToken.getValue(), tokenRequest);
 		assertEquals("[read, write]", refreshedAccessToken.getScope().toString());

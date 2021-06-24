@@ -90,7 +90,7 @@ public class ResourceServerConfigurationTests {
 		token = new DefaultOAuth2AccessToken("FOO");
 		ClientDetails client = new BaseClientDetails("client", null, "read", "client_credentials", "ROLE_CLIENT");
 		authentication = new OAuth2Authentication(
-				new TokenRequest(null, "client", null, "client_credentials").createOAuth2Request(client), null);
+				new TokenRequest(null, "client", null, "client_credentials", null).createOAuth2Request(client), null);
 		tokenStore.clear();
 	}
 

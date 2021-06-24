@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.oauth2.provider.client.TokenEndpointAuthMethod;
 
 /**
  * Client details for OAuth 2
@@ -96,7 +97,21 @@ public interface ClientDetails extends Serializable {
 	 * @return the refresh token validity period
 	 */
 	Integer getRefreshTokenValiditySeconds();
-	
+
+	/**
+	 * The auth code validity period for this client. Null for default value set by token service.
+	 *
+	 * @return the auth code validity period
+	 */
+	Integer getAuthCodeValiditySeconds();
+
+	/**
+	 * Type of the requested authentication method for the token endpoint.
+	 *
+	 * @return authentication method for the token endpoint
+	 */
+	TokenEndpointAuthMethod getTokenEndpointAuthMethod();
+
 	/**
 	 * Test whether client needs user approval for a particular scope.
 	 * 

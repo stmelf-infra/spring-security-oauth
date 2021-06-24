@@ -71,6 +71,7 @@ public class DefaultOAuth2RequestFactory implements OAuth2RequestFactory {
 		String clientId = authorizationParameters.get(OAuth2Utils.CLIENT_ID);
 		String state = authorizationParameters.get(OAuth2Utils.STATE);
 		String redirectUri = authorizationParameters.get(OAuth2Utils.REDIRECT_URI);
+		String challenge = authorizationParameters.get(OAuth2Utils.CHALLENGE);
 		Set<String> responseTypes = OAuth2Utils.parseParameterList(authorizationParameters
 				.get(OAuth2Utils.RESPONSE_TYPE));
 
@@ -79,6 +80,7 @@ public class DefaultOAuth2RequestFactory implements OAuth2RequestFactory {
 		AuthorizationRequest request = new AuthorizationRequest(authorizationParameters,
 				Collections.<String, String> emptyMap(), clientId, scopes, null, null, false, state, redirectUri,
 				responseTypes);
+		request.setChallenge(challenge);
 
 		ClientDetails clientDetails = clientDetailsService.loadClientByClientId(clientId);		
 		request.setResourceIdsAndAuthoritiesFromClientDetails(clientDetails);
@@ -105,17 +107,21 @@ public class DefaultOAuth2RequestFactory implements OAuth2RequestFactory {
 			}
 		}
 		String grantType = requestParameters.get(OAuth2Utils.GRANT_TYPE);
+		String code_verifier = requestParameters.get(OAuth2Utils.CODE_VERIFIER);
 
 		Set<String> scopes = extractScopes(requestParameters, clientId);
-		TokenRequest tokenRequest = new TokenRequest(requestParameters, clientId, scopes, grantType);
 
-		return tokenRequest;
+		return new TokenRequest(requestParameters, clientId, scopes, grantType, code_verifier);
 	}
 
 	public TokenRequest createTokenRequest(AuthorizationRequest authorizationRequest, String grantType) {
-		TokenRequest tokenRequest = new TokenRequest(authorizationRequest.getRequestParameters(),
-				authorizationRequest.getClientId(), authorizationRequest.getScope(), grantType);
-		return tokenRequest;
+		return new TokenRequest(authorizationRequest.getRequestParameters(),
+				authorizationRequest.getClientId(), authorizationRequest.getScope(), grantType, null);
+	}
+
+	public TokenRequest createTokenRequest(AuthorizationRequest authorizationRequest, String grantType, String codeVerifier) {
+		return new TokenRequest(authorizationRequest.getRequestParameters(),
+				authorizationRequest.getClientId(), authorizationRequest.getScope(), grantType, codeVerifier);
 	}
 
 	public OAuth2Request createOAuth2Request(ClientDetails client, TokenRequest tokenRequest) {

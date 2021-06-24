@@ -53,6 +53,11 @@ public class AuthorizationRequest extends BaseRequest implements Serializable {
 	private String state;
 
 	/**
+	 * The value of the "challenge" parameter sent by the client in the request for initiating a PKCE.
+	 */
+	private String challenge;
+
+	/**
 	 * Resolved requested response types initialized (by the
 	 * OAuth2RequestFactory) with the response types originally requested.
 	 */
@@ -163,6 +168,14 @@ public class AuthorizationRequest extends BaseRequest implements Serializable {
 
 	public void setState(String state) {
 		this.state = state;
+	}
+
+	public String getChallenge() {
+		return challenge;
+	}
+
+	public void setChallenge(String challenge) {
+		this.challenge = challenge;
 	}
 
 	public Set<String> getResponseTypes() {

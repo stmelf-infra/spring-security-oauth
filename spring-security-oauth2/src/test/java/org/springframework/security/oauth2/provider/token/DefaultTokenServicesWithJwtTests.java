@@ -49,7 +49,7 @@ public class DefaultTokenServicesWithJwtTests extends AbstractDefaultTokenServic
 		ExpiringOAuth2RefreshToken expectedExpiringRefreshToken = (ExpiringOAuth2RefreshToken) initialToken
 				.getRefreshToken();
 		TokenRequest tokenRequest = new TokenRequest(Collections.singletonMap(
-				"client_id", "id"), "id", null, null);
+				"client_id", "id"), "id", null, null, null);
 		OAuth2AccessToken refreshedAccessToken = getTokenServices().refreshAccessToken(
 				expectedExpiringRefreshToken.getValue(), tokenRequest);
 		Map<String, ?> accessTokenInfo = parser.parseMap(JwtHelper.decode(
@@ -70,7 +70,7 @@ public class DefaultTokenServicesWithJwtTests extends AbstractDefaultTokenServic
 		OAuth2AccessToken initialToken = getTokenServices().createAccessToken(
 				authentication);
 		TokenRequest tokenRequest = new TokenRequest(Collections.singletonMap(
-				"client_id", "id"), "id", null, null);
+				"client_id", "id"), "id", null, null, null);
 		OAuth2AccessToken refreshedAccessToken = getTokenServices().refreshAccessToken(
 				initialToken.getRefreshToken().getValue(), tokenRequest);
 		refreshedAccessToken = getTokenServices().refreshAccessToken(
@@ -94,7 +94,7 @@ public class DefaultTokenServicesWithJwtTests extends AbstractDefaultTokenServic
 		ExpiringOAuth2RefreshToken refreshToken = (ExpiringOAuth2RefreshToken) accessToken.getRefreshToken();
 
 		TokenRequest tokenRequest = new TokenRequest(
-				Collections.singletonMap("client_id", "id"), "id", null, null);
+				Collections.singletonMap("client_id", "id"), "id", null, null, null);
 		OAuth2AccessToken refreshedAccessToken = getTokenServices().refreshAccessToken(
 				refreshToken.getValue(), tokenRequest);
 

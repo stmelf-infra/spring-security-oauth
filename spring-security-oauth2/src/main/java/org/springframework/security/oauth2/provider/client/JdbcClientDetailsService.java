@@ -59,7 +59,8 @@ public class JdbcClientDetailsService implements ClientDetailsService, ClientReg
 
 	private static final String CLIENT_FIELDS_FOR_UPDATE = "resource_ids, scope, "
 			+ "authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity, "
-			+ "refresh_token_validity, additional_information, autoapprove";
+			+ "refresh_token_validity, auth_code_validity, additional_information, autoapprove, "
+			+ "token_endpoint_auth_method";
 
 	private static final String CLIENT_FIELDS = "client_secret, " + CLIENT_FIELDS_FOR_UPDATE;
 
@@ -71,7 +72,7 @@ public class JdbcClientDetailsService implements ClientDetailsService, ClientReg
 	private static final String DEFAULT_SELECT_STATEMENT = BASE_FIND_STATEMENT + " where client_id = ?";
 
 	private static final String DEFAULT_INSERT_STATEMENT = "insert into oauth_client_details (" + CLIENT_FIELDS
-			+ ", client_id) values (?,?,?,?,?,?,?,?,?,?,?)";
+			+ ", client_id) values (?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
 	private static final String DEFAULT_UPDATE_STATEMENT = "update oauth_client_details " + "set "
 			+ CLIENT_FIELDS_FOR_UPDATE.replaceAll(", ", "=?, ") + "=? where client_id = ?";
@@ -188,7 +189,8 @@ public class JdbcClientDetailsService implements ClientDetailsService, ClientReg
 						.collectionToCommaDelimitedString(clientDetails.getRegisteredRedirectUri()) : null,
 				clientDetails.getAuthorities() != null ? StringUtils.collectionToCommaDelimitedString(clientDetails
 						.getAuthorities()) : null, clientDetails.getAccessTokenValiditySeconds(),
-				clientDetails.getRefreshTokenValiditySeconds(), json, getAutoApproveScopes(clientDetails),
+				clientDetails.getRefreshTokenValiditySeconds(), clientDetails.getAuthCodeValiditySeconds(),
+				json, getAutoApproveScopes(clientDetails), clientDetails.getTokenEndpointAuthMethod().toString(),
 				clientDetails.getClientId() };
 	}
 
@@ -262,7 +264,10 @@ public class JdbcClientDetailsService implements ClientDetailsService, ClientReg
 			if (rs.getObject(9) != null) {
 				details.setRefreshTokenValiditySeconds(rs.getInt(9));
 			}
-			String json = rs.getString(10);
+			if (rs.getObject(10) != null) {
+				details.setAuthCodeValiditySeconds(rs.getInt(10));
+			}
+			String json = rs.getString(11);
 			if (json != null) {
 				try {
 					@SuppressWarnings("unchecked")
@@ -273,10 +278,13 @@ public class JdbcClientDetailsService implements ClientDetailsService, ClientReg
 					logger.warn("Could not decode JSON for additional information: " + details, e);
 				}
 			}
-			String scopes = rs.getString(11);
+			String scopes = rs.getString(12);
 			if (scopes != null) {
 				details.setAutoApproveScopes(StringUtils.commaDelimitedListToSet(scopes));
 			}
+
+			details.setTokenEndpointAuthMethod(TokenEndpointAuthMethod.valueOf(rs.getString(13)));
+
 			return details;
 		}
 	}

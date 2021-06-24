@@ -2,6 +2,7 @@ package org.springframework.security.oauth2.provider;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -51,6 +52,10 @@ public class OAuth2Request extends BaseRequest implements Serializable {
 	 * the Client's default registered value.
 	 */
 	private String redirectUri;
+
+	private String challenge;
+
+	private Date expires;
 
 	/**
 	 * Resolved requested response types initialized (by the OAuth2RequestFactory) with the response types originally
@@ -123,6 +128,14 @@ public class OAuth2Request extends BaseRequest implements Serializable {
 
 	public Map<String, Serializable> getExtensions() {
 		return extensions;
+	}
+
+	public String getChallenge() {
+		return challenge;
+	}
+
+	public Date getExpires() {
+		return expires;
 	}
 
 	/**
