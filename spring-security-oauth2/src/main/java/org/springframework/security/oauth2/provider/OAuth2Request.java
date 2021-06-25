@@ -53,10 +53,6 @@ public class OAuth2Request extends BaseRequest implements Serializable {
 	 */
 	private String redirectUri;
 
-	private String challenge;
-
-	private Date expires;
-
 	/**
 	 * Resolved requested response types initialized (by the OAuth2RequestFactory) with the response types originally
 	 * requested.
@@ -128,14 +124,6 @@ public class OAuth2Request extends BaseRequest implements Serializable {
 
 	public Map<String, Serializable> getExtensions() {
 		return extensions;
-	}
-
-	public String getChallenge() {
-		return challenge;
-	}
-
-	public Date getExpires() {
-		return expires;
 	}
 
 	/**

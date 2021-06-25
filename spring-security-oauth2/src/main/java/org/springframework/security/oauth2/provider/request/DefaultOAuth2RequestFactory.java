@@ -71,7 +71,8 @@ public class DefaultOAuth2RequestFactory implements OAuth2RequestFactory {
 		String clientId = authorizationParameters.get(OAuth2Utils.CLIENT_ID);
 		String state = authorizationParameters.get(OAuth2Utils.STATE);
 		String redirectUri = authorizationParameters.get(OAuth2Utils.REDIRECT_URI);
-		String challenge = authorizationParameters.get(OAuth2Utils.CHALLENGE);
+		String codeChallenge = authorizationParameters.get(OAuth2Utils.CODE_CHALLENGE);
+		String codeChallengeMethod = authorizationParameters.get(OAuth2Utils.CODE_CHALLENGE_METHOD);
 		Set<String> responseTypes = OAuth2Utils.parseParameterList(authorizationParameters
 				.get(OAuth2Utils.RESPONSE_TYPE));
 
@@ -80,7 +81,8 @@ public class DefaultOAuth2RequestFactory implements OAuth2RequestFactory {
 		AuthorizationRequest request = new AuthorizationRequest(authorizationParameters,
 				Collections.<String, String> emptyMap(), clientId, scopes, null, null, false, state, redirectUri,
 				responseTypes);
-		request.setChallenge(challenge);
+		request.setCodeChallenge(codeChallenge);
+		request.setCodeChallengeMethod(codeChallengeMethod);
 
 		ClientDetails clientDetails = clientDetailsService.loadClientByClientId(clientId);		
 		request.setResourceIdsAndAuthoritiesFromClientDetails(clientDetails);

@@ -55,7 +55,7 @@ public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
 	protected OAuth2Authentication getOAuth2Authentication(ClientDetails client, TokenRequest tokenRequest) {
 		Map<String, String> parameters = tokenRequest.getRequestParameters();
 		String authorizationCode = parameters.get("code");
-		String codeVerifier = parameters.get("code_verifier");
+		String codeVerifier = parameters.get(OAuth2Utils.CODE_VERIFIER);
 
 		String redirectUri = parameters.get(OAuth2Utils.REDIRECT_URI);
 
@@ -89,7 +89,7 @@ public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
 		// we are enforcing PKCE for all non-confidential (public) clients
 		if (TokenEndpointAuthMethod.client_secret_basic != client.getTokenEndpointAuthMethod()
 				||
-				null != storedAuth.getOAuth2Request().getChallenge()) {
+				null != storedAuth.getOAuth2Request().getRequestParameters().get(OAuth2Utils.CODE_CHALLENGE)) {
 			if (null == codeVerifier) {
 				throw new InvalidClientException("code_verifier must be supplied");
 			}
@@ -106,7 +106,7 @@ public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
 			}
 			derivedChallenge = sb.toString();
 
-			if (!derivedChallenge.equals(storedAuth.getOAuth2Request().getChallenge())) {
+			if (!derivedChallenge.equals(pendingOAuth2Request.getRequestParameters().get(OAuth2Utils.CODE_CHALLENGE))) {
 				throw new InvalidClientException("Invalid code_verifier");
 			}
 		}
