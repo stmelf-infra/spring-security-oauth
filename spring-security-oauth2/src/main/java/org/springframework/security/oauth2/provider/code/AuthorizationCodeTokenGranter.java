@@ -87,7 +87,7 @@ public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
 		}
 
 		// we are enforcing PKCE for all non-confidential (public) clients
-		if (TokenEndpointAuthMethod.client_secret_basic != client.getTokenEndpointAuthMethod()
+		if (TokenEndpointAuthMethod.none == client.getTokenEndpointAuthMethod()
 				||
 				null != storedAuth.getOAuth2Request().getRequestParameters().get(OAuth2Utils.CODE_CHALLENGE)) {
 			if (null == codeVerifier) {

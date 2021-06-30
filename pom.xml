@@ -6,7 +6,7 @@
     <name>OAuth2 for Spring Security Parent POM</name>
     <description>Parent Project for OAuth2 Support for Spring Security</description>
     <packaging>pom</packaging>
-    <version>2.6.0.BUILD-SNAPSHOT</version>
+    <version>2.7.0.BUILD-SNAPSHOT</version>
     <url>https://docs.spring.io/spring-security/oauth</url>
 
     <modules>

@@ -17,26 +17,31 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.common.exceptions.OAuth2Exception;
+import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
 import org.springframework.security.oauth2.common.exceptions.RedirectMismatchException;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.ClientDetails;
-import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.RequestTokenFactory;
 import org.springframework.security.oauth2.provider.TokenRequest;
 import org.springframework.security.oauth2.provider.client.BaseClientDetails;
+import org.springframework.security.oauth2.provider.client.JdbcClientDetailsService;
+import org.springframework.security.oauth2.provider.client.TokenEndpointAuthMethod;
 import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
-import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
+import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -47,27 +52,56 @@ import static org.junit.Assert.fail;
  * 
  */
 public class AuthorizationCodeTokenGranterTests {
+	private EmbeddedDatabase db;
+	private final DefaultTokenServices providerTokenServices = new DefaultTokenServices();
+	private static final String CONFIDENTIAL_CLIENT_ID = "confidential";
+	private static final String PUBLIC_CLIENT_ID = "public";
 
-	private DefaultTokenServices providerTokenServices = new DefaultTokenServices();
+	private JdbcClientDetailsService clientDetailsService;
 
-	private BaseClientDetails client = new BaseClientDetails("foo", "resource", "scope", "authorization_code",
-			"ROLE_CLIENT");
-
-	private ClientDetailsService clientDetailsService = new ClientDetailsService() {
-		public ClientDetails loadClientByClientId(String clientId) throws OAuth2Exception {
-			return client;
-		}
-	};
-
-	private AuthorizationCodeServices authorizationCodeServices = new InMemoryAuthorizationCodeServices();
+	private AuthorizationCodeServices authorizationCodeServices;
 	
-	private OAuth2RequestFactory requestFactory = new DefaultOAuth2RequestFactory(clientDetailsService);
+	private OAuth2RequestFactory requestFactory;
 
-	private Map<String, String> parameters = new HashMap<String, String>();
+	private final Map<String, String> parameters = new HashMap<>();
 
-	public AuthorizationCodeTokenGranterTests() {
-		providerTokenServices.setTokenStore(new InMemoryTokenStore());
+	@Before
+	public void setUp() throws Exception {
+		// creates a HSQL in-memory db populated from default scripts classpath:schema.sql and classpath:data.sql
+		db = new EmbeddedDatabaseBuilder().addDefaultScripts().build();
+		providerTokenServices.setTokenStore(new JdbcTokenStore(db));
+		clientDetailsService = new JdbcClientDetailsService(db);
+		authorizationCodeServices = new JdbcAuthorizationCodeServices(db, clientDetailsService);
+		requestFactory = new DefaultOAuth2RequestFactory(clientDetailsService);
+		authorizationCodeServices = new JdbcAuthorizationCodeServices(db, clientDetailsService);
+		BaseClientDetails client = new BaseClientDetails(
+				CONFIDENTIAL_CLIENT_ID,
+				"resource",
+				"scope",
+				"authorization_code",
+				"ROLE_CLIENT",
+				"http://localhost:8080",
+				TokenEndpointAuthMethod.client_secret_basic);
+		client.setAuthCodeValiditySeconds(10);
+		clientDetailsService.addClientDetails(client);
+
+		client = new BaseClientDetails(
+				PUBLIC_CLIENT_ID,
+				"resource",
+				"scope",
+				"authorization_code",
+				"ROLE_CLIENT",
+				"http://localhost:8080",
+				TokenEndpointAuthMethod.none);
+		client.setAuthCodeValiditySeconds(10);
+		clientDetailsService.addClientDetails(client);
 	}
+
+	@After
+	public void tearDown() {
+		db.shutdown();
+	}
+
 
 	@Test
 	public void testAuthorizationCodeGrant() {
@@ -76,16 +110,18 @@ public class AuthorizationCodeTokenGranterTests {
 				AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
 		
 		parameters.clear();
-		parameters.put(OAuth2Utils.CLIENT_ID, "foo");
+		parameters.put(OAuth2Utils.CLIENT_ID, CONFIDENTIAL_CLIENT_ID);
 		parameters.put(OAuth2Utils.SCOPE, "scope");
-		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request(parameters, "foo", true, Collections.singleton("scope"));
+		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request(parameters, CONFIDENTIAL_CLIENT_ID,
+				true, Collections.singleton("scope"));
 		
 		String code = authorizationCodeServices.createAuthorizationCode(new OAuth2Authentication(
 				storedOAuth2Request, userAuthentication));
 		parameters.putAll(storedOAuth2Request.getRequestParameters());
-		parameters.put("code", code);
-		
-		TokenRequest tokenRequest = requestFactory.createTokenRequest(parameters, client);
+		parameters.put(OAuth2Utils.CODE, code);
+
+		TokenRequest tokenRequest = requestFactory.createTokenRequest(parameters,
+				clientDetailsService.loadClientByClientId(CONFIDENTIAL_CLIENT_ID));
 				
 		AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(providerTokenServices,
 				authorizationCodeServices, clientDetailsService, requestFactory);
@@ -94,21 +130,123 @@ public class AuthorizationCodeTokenGranterTests {
 	}
 
 	@Test
+	public void testAuthorizationCodeGrantWithPKCE() {
+
+		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("marissa", "koala",
+				AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
+
+		parameters.clear();
+		parameters.put(OAuth2Utils.CLIENT_ID, PUBLIC_CLIENT_ID);
+		parameters.put(OAuth2Utils.SCOPE, "scope");
+		parameters.put(OAuth2Utils.CODE_CHALLENGE_METHOD, "S256");
+		parameters.put(OAuth2Utils.CODE_CHALLENGE, "SsytUX8x0QQH9VdB2ou9YPeIdlglzgsBldJdA1qRqnE");
+		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request(parameters, PUBLIC_CLIENT_ID,
+				true, Collections.singleton("scope"));
+
+		String code = authorizationCodeServices.createAuthorizationCode(new OAuth2Authentication(
+				storedOAuth2Request, userAuthentication));
+		parameters.clear();
+		parameters.put(OAuth2Utils.CLIENT_ID, PUBLIC_CLIENT_ID);
+		parameters.put(OAuth2Utils.SCOPE, "scope");
+		parameters.put(OAuth2Utils.CODE_VERIFIER, "lYQIMheCCdMIahDbvPA7C2rR5cGAK6ShFUsxP4YukzQ");
+		parameters.put(OAuth2Utils.CODE, code);
+
+		TokenRequest tokenRequest = requestFactory.createTokenRequest(parameters,
+				clientDetailsService.loadClientByClientId(PUBLIC_CLIENT_ID));
+
+		AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(providerTokenServices,
+				authorizationCodeServices, clientDetailsService, requestFactory);
+		OAuth2AccessToken token = granter.grant("authorization_code", tokenRequest);
+		assertTrue(providerTokenServices.loadAuthentication(token.getValue()).isAuthenticated());
+	}
+
+	@Test
+	public void testAuthorizationCodeGrantWithPKCEMissingVerifier() {
+
+		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("marissa", "koala",
+				AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
+
+		parameters.clear();
+		parameters.put(OAuth2Utils.CLIENT_ID, PUBLIC_CLIENT_ID);
+		parameters.put(OAuth2Utils.SCOPE, "scope");
+		parameters.put(OAuth2Utils.CODE_CHALLENGE_METHOD, "S256");
+		parameters.put(OAuth2Utils.CODE_CHALLENGE, "SsytUX8x0QQH9VdB2ou9YPeIdlglzgsBldJdA1qRqnE");
+		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request(parameters, PUBLIC_CLIENT_ID,
+				true, Collections.singleton("scope"));
+
+		String code = authorizationCodeServices.createAuthorizationCode(new OAuth2Authentication(
+				storedOAuth2Request, userAuthentication));
+		parameters.clear();
+		parameters.put(OAuth2Utils.CLIENT_ID, PUBLIC_CLIENT_ID);
+		parameters.put(OAuth2Utils.SCOPE, "scope");
+		parameters.put(OAuth2Utils.CODE, code);
+
+		TokenRequest tokenRequest = requestFactory.createTokenRequest(parameters,
+				clientDetailsService.loadClientByClientId(PUBLIC_CLIENT_ID));
+
+		AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(providerTokenServices,
+				authorizationCodeServices, clientDetailsService, requestFactory);
+		try {
+			granter.grant("authorization_code", tokenRequest);
+			fail("code verifier validation fails");
+		} catch (InvalidClientException e) {
+			assertEquals("code_verifier must be supplied", e.getMessage());
+		}
+	}
+
+	public void testAuthorizationCodeGrantWithPKCEInvalidVerifier() {
+
+		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("marissa", "koala",
+				AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
+
+		parameters.clear();
+		parameters.put(OAuth2Utils.CLIENT_ID, PUBLIC_CLIENT_ID);
+		parameters.put(OAuth2Utils.SCOPE, "scope");
+		parameters.put(OAuth2Utils.CODE_CHALLENGE_METHOD, "S256");
+		parameters.put(OAuth2Utils.CODE_CHALLENGE, "SsytUX8x0QQH9VdB2ou9YPeIdlglzgsBldJdA1qRqnE");
+		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request(parameters, PUBLIC_CLIENT_ID,
+				true, Collections.singleton("scope"));
+
+		String code = authorizationCodeServices.createAuthorizationCode(new OAuth2Authentication(
+				storedOAuth2Request, userAuthentication));
+		parameters.clear();
+		parameters.put(OAuth2Utils.CLIENT_ID, PUBLIC_CLIENT_ID);
+		parameters.put(OAuth2Utils.SCOPE, "scope");
+		parameters.put(OAuth2Utils.CODE, code);
+		parameters.put(OAuth2Utils.CODE_VERIFIER, "11111lYQIMheCCdMIahDbvPA7C2rR5cGAK6ShFUsxP4YukzQ");
+
+
+		TokenRequest tokenRequest = requestFactory.createTokenRequest(parameters,
+				clientDetailsService.loadClientByClientId(PUBLIC_CLIENT_ID));
+
+		AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(providerTokenServices,
+				authorizationCodeServices, clientDetailsService, requestFactory);
+		try {
+			granter.grant("authorization_code", tokenRequest);
+			fail("code verifier validation fails");
+		} catch (InvalidClientException e) {
+			assertEquals("Invalid code_verifier", e.getMessage());
+		}
+	}
+
+	@Test
 	public void testAuthorizationParametersPreserved() {
 		
 		parameters.clear();
 		parameters.put("foo", "bar");
-		parameters.put(OAuth2Utils.CLIENT_ID, "foo");
+		parameters.put(OAuth2Utils.CLIENT_ID, CONFIDENTIAL_CLIENT_ID);
 		parameters.put(OAuth2Utils.SCOPE, "scope");
-		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request(parameters, "foo", true, Collections.singleton("scope"));
+		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request(parameters, CONFIDENTIAL_CLIENT_ID,
+				true, Collections.singleton("scope"));
 		
 		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("marissa", "koala",
 				AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
 		String code = authorizationCodeServices.createAuthorizationCode(new OAuth2Authentication(
 				storedOAuth2Request, userAuthentication));
 
-		parameters.put("code", code);
-		TokenRequest tokenRequest = requestFactory.createTokenRequest(parameters, client);
+		parameters.put(OAuth2Utils.CODE, code);
+		TokenRequest tokenRequest = requestFactory.createTokenRequest(parameters,
+				clientDetailsService.loadClientByClientId(CONFIDENTIAL_CLIENT_ID));
 		
 		AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(providerTokenServices,
 				authorizationCodeServices, clientDetailsService, requestFactory);
@@ -123,19 +261,20 @@ public class AuthorizationCodeTokenGranterTests {
 	public void testAuthorizationRequestPreserved() {
 		
 		parameters.clear();
-		parameters.put(OAuth2Utils.CLIENT_ID, "foo");
+		parameters.put(OAuth2Utils.CLIENT_ID, CONFIDENTIAL_CLIENT_ID);
 		parameters.put(OAuth2Utils.SCOPE, "read");
-		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request(parameters, "foo", null, true, Collections.singleton("read"), Collections.singleton("resource"), null, null, null);
+		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request(parameters, CONFIDENTIAL_CLIENT_ID, null, true, Collections.singleton("read"), Collections.singleton("resource"), null, null, null);
 		
 		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("marissa", "koala",
 				AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
 		String code = authorizationCodeServices.createAuthorizationCode(new OAuth2Authentication(
 				storedOAuth2Request, userAuthentication));
 
-		parameters.put("code", code);
+		parameters.put(OAuth2Utils.CODE, code);
 		// Ensure even if token request asks for more scope they are not granted
 		parameters.put(OAuth2Utils.SCOPE, "read write");
-		TokenRequest tokenRequest = requestFactory.createTokenRequest(parameters, client);
+		TokenRequest tokenRequest = requestFactory.createTokenRequest(parameters,
+				clientDetailsService.loadClientByClientId(CONFIDENTIAL_CLIENT_ID));
 		
 		AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(providerTokenServices,
 				authorizationCodeServices, clientDetailsService, requestFactory);
@@ -151,16 +290,18 @@ public class AuthorizationCodeTokenGranterTests {
 	public void testAuthorizationCodeGrantWithNoClientAuthorities() {
 		
 		parameters.clear();
-		parameters.put(OAuth2Utils.CLIENT_ID, "foo");
+		parameters.put(OAuth2Utils.CLIENT_ID, CONFIDENTIAL_CLIENT_ID);
 		parameters.put(OAuth2Utils.SCOPE, "scope");
-		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request(parameters, "foo", Collections.<GrantedAuthority> emptySet(), true, Collections.singleton("scope"), null, null, null, null);
+		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request(parameters, CONFIDENTIAL_CLIENT_ID,
+				Collections.<GrantedAuthority> emptySet(), true, Collections.singleton("scope"), null, null, null, null);
 		
 		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("marissa", "koala",
 				AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
 		String code = authorizationCodeServices.createAuthorizationCode(new OAuth2Authentication(
 				storedOAuth2Request, userAuthentication));
-		parameters.put("code", code);
-		TokenRequest tokenRequest = requestFactory.createTokenRequest(parameters, client);
+		parameters.put(OAuth2Utils.CODE, code);
+		TokenRequest tokenRequest = requestFactory.createTokenRequest(parameters,
+				clientDetailsService.loadClientByClientId(CONFIDENTIAL_CLIENT_ID));
 		AuthorizationCodeTokenGranter granter = new AuthorizationCodeTokenGranter(providerTokenServices,
 				authorizationCodeServices, clientDetailsService, requestFactory);
 		OAuth2AccessToken token = granter.grant("authorization_code", tokenRequest);
@@ -177,20 +318,18 @@ public class AuthorizationCodeTokenGranterTests {
 
 		parameters.clear();
 		parameters.put(OAuth2Utils.REDIRECT_URI, "https://redirectMe");
-		parameters.put(OAuth2Utils.CLIENT_ID, "foo");
-		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request(parameters, "foo", null, true, null, null, "https://redirectMe", null, null);
+		parameters.put(OAuth2Utils.CLIENT_ID, CONFIDENTIAL_CLIENT_ID);
+		OAuth2Request storedOAuth2Request = RequestTokenFactory.createOAuth2Request(parameters, CONFIDENTIAL_CLIENT_ID,
+				null, true, null, null, "https://redirectMe", null, null);
 		
 		Authentication userAuthentication = new UsernamePasswordAuthenticationToken("marissa", "koala",
 				AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
 		String code = authorizationCodeServices.createAuthorizationCode(new OAuth2Authentication(storedOAuth2Request,
 				userAuthentication));
 
-		Map<String, String> authorizationParameters = new HashMap<String, String>();
-		authorizationParameters.put("code", code);
-	
-		//AuthorizationRequest oAuth2Request = createFromParameters(initialParameters);
-		//oAuth2Request.setRequestParameters(authorizationParameters);
-
+		Map<String, String> authorizationParameters = new HashMap<>();
+		authorizationParameters.put(OAuth2Utils.CODE, code);
+		ClientDetails client = clientDetailsService.loadClientByClientId(CONFIDENTIAL_CLIENT_ID);
 		TokenRequest tokenRequest = requestFactory.createTokenRequest(parameters, client);
 		tokenRequest.setRequestParameters(authorizationParameters);
 		
