@@ -9,8 +9,10 @@ create table oauth_client_details (
   authorities VARCHAR(256),
   access_token_validity INTEGER,
   refresh_token_validity INTEGER,
+  auth_code_validity INTEGER,
   additional_information VARCHAR(4096),
-  autoapprove VARCHAR(256)
+  autoapprove VARCHAR(256),
+  token_endpoint_auth_method VARCHAR(256)
 );
 
 create table oauth_client_token (
@@ -38,7 +40,7 @@ create table oauth_refresh_token (
 );
 
 create table oauth_code (
-  code VARCHAR(256), authentication LONGVARBINARY
+  code VARCHAR(256), authentication LONGVARBINARY, expires TIMESTAMP, challenge VARCHAR(256)
 );
 
 create table oauth_approvals (
@@ -62,6 +64,8 @@ create table ClientDetails (
   authorities VARCHAR(256),
   access_token_validity INTEGER,
   refresh_token_validity INTEGER,
+  auth_code_validity INTEGER,
   additionalInformation VARCHAR(4096),
-  autoApproveScopes VARCHAR(256)
+  autoApproveScopes VARCHAR(256),
+  token_endpoint_auth_method VARCHAR(256)
 );

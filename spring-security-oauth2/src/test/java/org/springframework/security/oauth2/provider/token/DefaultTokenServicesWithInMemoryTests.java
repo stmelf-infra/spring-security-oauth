@@ -70,7 +70,8 @@ public class DefaultTokenServicesWithInMemoryTests extends AbstractPersistentDef
 		firstAccessToken.setExpiration(new Date(System.currentTimeMillis() - 1000));
 		expected.expect(InvalidTokenException.class);
 		expected.expectMessage("refresh token (expired)");
-		TokenRequest tokenRequest = new TokenRequest(Collections.singletonMap("client_id", "id"), "id", null, null);
+		TokenRequest tokenRequest = new TokenRequest(Collections.singletonMap("client_id", "id"), "id",
+				null, null, null);
 		getTokenServices().refreshAccessToken(firstAccessToken.getRefreshToken().getValue(), tokenRequest);
 	}
 
@@ -89,7 +90,8 @@ public class DefaultTokenServicesWithInMemoryTests extends AbstractPersistentDef
 				expectedAuthentication);
 		assertNotNull(firstAccessToken.getRefreshToken());
 		expected.expect(AccountExpiredException.class);
-		TokenRequest tokenRequest = new TokenRequest(Collections.singletonMap("client_id", "id"), "id", null, null);
+		TokenRequest tokenRequest = new TokenRequest(Collections.singletonMap("client_id", "id"), "id",
+				null, null, null);
 		getTokenServices().refreshAccessToken(firstAccessToken.getRefreshToken().getValue(), tokenRequest);
 	}
 
@@ -139,7 +141,7 @@ public class DefaultTokenServicesWithInMemoryTests extends AbstractPersistentDef
 		// refresh access token with refresh token
 
 		TokenRequest tokenRequest = new TokenRequest(Collections.singletonMap("client_id", "id"), "id",
-				Collections.singleton("read"), null);
+				Collections.singleton("read"), null, null);
 		getTokenServices().refreshAccessToken(expectedExpiringRefreshToken.getValue(), tokenRequest);
 		assertEquals(1, getAccessTokenCount());
 	}

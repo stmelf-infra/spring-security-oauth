@@ -134,7 +134,7 @@ public class TokenServicesWithTokenEnhancerTests {
 		OAuth2RefreshToken refreshToken = accessToken.getRefreshToken();
 
 		TokenRequest tokenRequest = new TokenRequest(Collections.<String, String>emptyMap(),
-				request.getClientId(), request.getScope(), "authorization_code");
+				request.getClientId(), request.getScope(), "authorization_code", null);
 
 		accessToken = tokenServices.refreshAccessToken(refreshToken.getValue(), tokenRequest);
 		OAuth2RefreshToken enhancedRefreshToken = accessToken.getRefreshToken();

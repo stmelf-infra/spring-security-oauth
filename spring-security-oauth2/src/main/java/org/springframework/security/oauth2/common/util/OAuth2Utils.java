@@ -55,6 +55,26 @@ public abstract class OAuth2Utils {
 	/**
 	 * Constant to use while parsing and formatting parameter maps for OAuth2 requests
 	 */
+	public static final String CODE_CHALLENGE = "code_challenge";
+
+	/**
+	 * Constant to use while parsing and formatting parameter maps for OAuth2 requests
+	 */
+	public static final String CODE_CHALLENGE_METHOD = "code_challenge_method";
+
+	/**
+	 * Constant to use while parsing and formatting parameter maps for OAuth2 requests
+	 */
+	public static final String CODE = "code";
+
+	/**
+	 * Constant to use while parsing and formatting parameter maps for OAuth2 requests
+	 */
+	public static final String CODE_VERIFIER = "code_verifier";
+
+	/**
+	 * Constant to use while parsing and formatting parameter maps for OAuth2 requests
+	 */
 	public static final String RESPONSE_TYPE = "response_type";
 
 	/**

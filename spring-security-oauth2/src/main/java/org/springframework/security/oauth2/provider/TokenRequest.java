@@ -25,6 +25,8 @@ public class TokenRequest extends BaseRequest {
 
 	private String grantType;
 
+	private String codeVerifier;
+
 	/**
 	 * Default constructor
 	 */
@@ -40,11 +42,12 @@ public class TokenRequest extends BaseRequest {
 	 * @param grantType
 	 */
 	public TokenRequest(Map<String, String> requestParameters, String clientId, Collection<String> scope,
-			String grantType) {
+			String grantType, String codeVerifier) {
 		setClientId(clientId);
 		setRequestParameters(requestParameters);
 		setScope(scope);
 		this.grantType = grantType;
+		this.codeVerifier = codeVerifier;
 	}
 
 	public String getGrantType() {

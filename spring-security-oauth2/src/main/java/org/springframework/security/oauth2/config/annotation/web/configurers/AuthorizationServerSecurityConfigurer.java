@@ -243,12 +243,16 @@ public final class AuthorizationServerSecurityConfigurer extends
 				frameworkEndpointHandlerMapping().getServletPath("/oauth/token"));
 		clientCredentialsTokenEndpointFilter
 				.setAuthenticationManager(http.getSharedObject(AuthenticationManager.class));
+		clientCredentialsTokenEndpointFilter.setAllowOnlyPost(true);
 		OAuth2AuthenticationEntryPoint authenticationEntryPoint = new OAuth2AuthenticationEntryPoint();
 		authenticationEntryPoint.setTypeName("Form");
 		authenticationEntryPoint.setRealmName(realm);
 		clientCredentialsTokenEndpointFilter.setAuthenticationEntryPoint(authenticationEntryPoint);
 		clientCredentialsTokenEndpointFilter = postProcess(clientCredentialsTokenEndpointFilter);
-		http.addFilterBefore(clientCredentialsTokenEndpointFilter, BasicAuthenticationFilter.class);
+		// OAuth2 supports both client_secret_basic and client_secret_post authentication methods
+		// for token endpoint.
+		// The client_secret_basic has higher precedence.
+		http.addFilterAfter(clientCredentialsTokenEndpointFilter, BasicAuthenticationFilter.class);
 		return clientCredentialsTokenEndpointFilter;
 	}
 

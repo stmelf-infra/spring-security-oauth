@@ -2,6 +2,7 @@ package org.springframework.security.oauth2.provider;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;

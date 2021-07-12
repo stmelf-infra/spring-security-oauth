@@ -55,7 +55,8 @@ public abstract class AbstractPersistentDefaultTokenServicesTests extends Abstra
 
 		OAuth2AccessToken accessToken = getTokenServices().createAccessToken(createAuthentication());
 		assertTrue(accessToken.getValue().startsWith("I'mEnhanced"));
-		TokenRequest tokenRequest = new TokenRequest(Collections.singletonMap("client_id", "id"), "id", null, null);
+		TokenRequest tokenRequest = new TokenRequest(Collections.singletonMap("client_id", "id"), "id",
+				null, null, null);
 		OAuth2AccessToken refreshedAccessToken = getTokenServices().refreshAccessToken(
 				accessToken.getRefreshToken().getValue(), tokenRequest);
 		assertTrue(refreshedAccessToken.getValue().startsWith("I'mEnhanced"));
@@ -94,7 +95,8 @@ public abstract class AbstractPersistentDefaultTokenServicesTests extends Abstra
 		getTokenServices().setSupportRefreshToken(true);
 		OAuth2AccessToken accessToken = getTokenServices().createAccessToken(createAuthentication());
 		OAuth2RefreshToken expectedExpiringRefreshToken = accessToken.getRefreshToken();
-		TokenRequest tokenRequest = new TokenRequest(Collections.singletonMap("client_id", "id"), "id", null, null);
+		TokenRequest tokenRequest = new TokenRequest(Collections.singletonMap("client_id", "id"), "id",
+				null, null, null);
 		OAuth2AccessToken refreshedAccessToken = getTokenServices().refreshAccessToken(
 				expectedExpiringRefreshToken.getValue(), tokenRequest);
 		assertNotNull(refreshedAccessToken);
@@ -107,7 +109,8 @@ public abstract class AbstractPersistentDefaultTokenServicesTests extends Abstra
 		getTokenServices().setReuseRefreshToken(false);
 		OAuth2AccessToken accessToken = getTokenServices().createAccessToken(createAuthentication());
 		OAuth2RefreshToken expectedExpiringRefreshToken = accessToken.getRefreshToken();
-		TokenRequest tokenRequest = new TokenRequest(Collections.singletonMap("client_id", "id"), "id", null, null);
+		TokenRequest tokenRequest = new TokenRequest(Collections.singletonMap("client_id", "id"), "id",
+				null, null, null);
 		OAuth2AccessToken refreshedAccessToken = getTokenServices().refreshAccessToken(
 				expectedExpiringRefreshToken.getValue(), tokenRequest);
 		assertNotNull(refreshedAccessToken);

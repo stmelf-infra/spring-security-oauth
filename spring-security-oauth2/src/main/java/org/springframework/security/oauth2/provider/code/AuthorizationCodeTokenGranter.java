@@ -16,9 +16,10 @@
 
 package org.springframework.security.oauth2.provider.code;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-
+import java.util.Base64;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.common.exceptions.InvalidClientException;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
@@ -31,37 +32,31 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.TokenRequest;
+import org.springframework.security.oauth2.provider.client.TokenEndpointAuthMethod;
 import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 
-/**
- * Token granter for the authorization code grant type.
- * 
- * @author Dave Syer
- * 
- */
+import com.google.common.hash.Hashing;
+
 public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
-
 	private static final String GRANT_TYPE = "authorization_code";
-
 	private final AuthorizationCodeServices authorizationCodeServices;
 
-	public AuthorizationCodeTokenGranter(AuthorizationServerTokenServices tokenServices,
-			AuthorizationCodeServices authorizationCodeServices, ClientDetailsService clientDetailsService, OAuth2RequestFactory requestFactory) {
-		this(tokenServices, authorizationCodeServices, clientDetailsService, requestFactory, GRANT_TYPE);
-	}
-
-	protected AuthorizationCodeTokenGranter(AuthorizationServerTokenServices tokenServices, AuthorizationCodeServices authorizationCodeServices,
-			ClientDetailsService clientDetailsService, OAuth2RequestFactory requestFactory, String grantType) {
-		super(tokenServices, clientDetailsService, requestFactory, grantType);
+	public AuthorizationCodeTokenGranter(
+			AuthorizationServerTokenServices tokenServices,
+			AuthorizationCodeServices authorizationCodeServices,
+			ClientDetailsService clientDetailsService,
+			OAuth2RequestFactory requestFactory) {
+		super(tokenServices, clientDetailsService, requestFactory, GRANT_TYPE);
 		this.authorizationCodeServices = authorizationCodeServices;
 	}
 
 	@Override
 	protected OAuth2Authentication getOAuth2Authentication(ClientDetails client, TokenRequest tokenRequest) {
-
 		Map<String, String> parameters = tokenRequest.getRequestParameters();
 		String authorizationCode = parameters.get("code");
+		String codeVerifier = parameters.get(OAuth2Utils.CODE_VERIFIER);
+
 		String redirectUri = parameters.get(OAuth2Utils.REDIRECT_URI);
 
 		if (authorizationCode == null) {
@@ -91,22 +86,46 @@ public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
 			throw new InvalidClientException("Client ID mismatch");
 		}
 
+		// we are enforcing PKCE for all non-confidential (public) clients
+		if (TokenEndpointAuthMethod.none == client.getTokenEndpointAuthMethod()
+				||
+				null != storedAuth.getOAuth2Request().getRequestParameters().get(OAuth2Utils.CODE_CHALLENGE)) {
+			if (null == codeVerifier) {
+				throw new InvalidClientException("code_verifier must be supplied");
+			}
+		}
+
+		if (null != codeVerifier) {
+			// the challenge is a SHA 256 hash represented in Base64url Encoding without Padding
+			String derivedChallenge = Base64.getUrlEncoder().encodeToString(
+					Hashing.sha256().hashString(codeVerifier, StandardCharsets.UTF_8)
+							.asBytes());
+			StringBuilder sb = new StringBuilder(derivedChallenge);
+			while (sb.length() > 0 && sb.charAt(sb.length() - 1) == '=') {
+				sb.setLength(sb.length() - 1);
+			}
+			derivedChallenge = sb.toString();
+
+			if (!derivedChallenge.equals(pendingOAuth2Request.getRequestParameters().get(OAuth2Utils.CODE_CHALLENGE))) {
+				throw new InvalidClientException("Invalid code_verifier");
+			}
+		}
+
 		// Secret is not required in the authorization request, so it won't be available
 		// in the pendingAuthorizationRequest. We do want to check that a secret is provided
 		// in the token request, but that happens elsewhere.
-
-		Map<String, String> combinedParameters = new HashMap<String, String>(pendingOAuth2Request
-				.getRequestParameters());
+		Map<String, String> combinedParameters = new HashMap<>(
+				pendingOAuth2Request
+						.getRequestParameters());
 		// Combine the parameters adding the new ones last so they override if there are any clashes
 		combinedParameters.putAll(parameters);
-		
+
 		// Make a new stored request with the combined parameters
 		OAuth2Request finalStoredOAuth2Request = pendingOAuth2Request.createOAuth2Request(combinedParameters);
-		
-		Authentication userAuth = storedAuth.getUserAuthentication();
-		
-		return new OAuth2Authentication(finalStoredOAuth2Request, userAuth);
 
+		Authentication userAuth = storedAuth.getUserAuthentication();
+
+		return new OAuth2Authentication(finalStoredOAuth2Request, userAuth);
 	}
 
 }

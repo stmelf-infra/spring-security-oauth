@@ -46,7 +46,7 @@
             <dependency>
                 <groupId>de.bayern.stmelf</groupId>
                 <artifactId>spring-security-oauth2</artifactId>
-                <version>2.6.0.BUILD-SNAPSHOT</version>
+                <version>2.7.0.BUILD-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>de.bayern.stmelf</groupId>

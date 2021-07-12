@@ -50,8 +50,8 @@ public abstract class AuthorizationCodeServicesBaseTests {
 	@Test
 	public void testConsumeNonExistingCode() {
 		try {
-			getAuthorizationCodeServices().consumeAuthorizationCode("doesnt exist");
-			fail("Should have thrown exception");
+			OAuth2Authentication result = getAuthorizationCodeServices().consumeAuthorizationCode("doesnt exist");
+			fail("Should have thrown exception but returned: " + result);
 		}
 		catch (InvalidGrantException e) {
 			// good we expected this

@@ -31,7 +31,8 @@ public class InMemoryImplicitGrantServiceTests {
 
 	private InMemoryImplicitGrantService service = new InMemoryImplicitGrantService();
 
-	private TokenRequest tokenRequest = new TokenRequest(Collections.<String, String> emptyMap(), "client", Collections.singleton("read"), "implicit");
+	private TokenRequest tokenRequest = new TokenRequest(Collections.<String, String> emptyMap(), "client",
+			Collections.singleton("read"), "implicit", null);
 
 	private ClientDetails client = new BaseClientDetails("client", "resource", "read", "implicit", "ROLE_CLIENT");
 
@@ -47,7 +48,8 @@ public class InMemoryImplicitGrantServiceTests {
 	@Test
 	public void testTransformedRequest() {
 		service.store(oauth2Request, tokenRequest);
-		TokenRequest tokenRequest = new TokenRequest(Collections.<String, String> emptyMap(), "client", Collections.singleton("read"), "implicit");
+		TokenRequest tokenRequest = new TokenRequest(Collections.<String, String> emptyMap(), "client",
+				Collections.singleton("read"), "implicit", null);
 		assertEquals(oauth2Request, service.remove(tokenRequest));
 		assertEquals(null, service.remove(tokenRequest));
 	}

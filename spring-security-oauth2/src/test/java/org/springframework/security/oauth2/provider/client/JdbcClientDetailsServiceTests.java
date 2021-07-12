@@ -34,9 +34,9 @@ public class JdbcClientDetailsServiceTests {
 
 	private static final String SELECT_SQL = "select client_id, client_secret, resource_ids, scope, authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity, refresh_token_validity from oauth_client_details where client_id=?";
 
-	private static final String INSERT_SQL = "insert into oauth_client_details (client_id, client_secret, resource_ids, scope, authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity, refresh_token_validity, autoapprove) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+	private static final String INSERT_SQL = "insert into oauth_client_details (client_id, client_secret, resource_ids, scope, authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity, refresh_token_validity, auth_code_validity, autoapprove, token_endpoint_auth_method) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-	private static final String CUSTOM_INSERT_SQL = "insert into ClientDetails (appId, appSecret, resourceIds, scope, grantTypes, redirectUrl, authorities) values (?, ?, ?, ?, ?, ?, ?)";
+	private static final String CUSTOM_INSERT_SQL = "insert into ClientDetails (appId, appSecret, resourceIds, scope, grantTypes, redirectUrl, authorities, auth_code_validity, token_endpoint_auth_method) values (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 	@Before
 	public void setUp() throws Exception {
@@ -60,7 +60,7 @@ public class JdbcClientDetailsServiceTests {
 	@Test
 	public void testLoadingClientIdWithNoDetails() {
 		jdbcTemplate.update(INSERT_SQL, "clientIdWithNoDetails", null, null,
-				null, null, null, null, null, null, null);
+				null, null, null, null, null, null, null, null, "none");
 
 		ClientDetails clientDetails = service
 				.loadClientByClientId("clientIdWithNoDetails");
@@ -80,7 +80,7 @@ public class JdbcClientDetailsServiceTests {
 	@Test
 	public void testLoadingClientIdWithAdditionalInformation() {
 		jdbcTemplate.update(INSERT_SQL, "clientIdWithAddInfo", null, null,
-				null, null, null, null, null, null, null);
+				null, null, null, null, null, null, null, null, "client_secret_basic");
 		jdbcTemplate
 				.update("update oauth_client_details set additional_information=? where client_id=?",
 						"{\"foo\":\"bar\"}", "clientIdWithAddInfo");
@@ -97,7 +97,7 @@ public class JdbcClientDetailsServiceTests {
 	public void testLoadingClientIdWithSingleDetails() {
 		jdbcTemplate.update(INSERT_SQL, "clientIdWithSingleDetails",
 				"mySecret", "myResource", "myScope", "myAuthorizedGrantType",
-				"myRedirectUri", "myAuthority", 100, 200, "true");
+				"myRedirectUri", "myAuthority", 100, 200, 100, "true", "client_secret_basic");
 
 		ClientDetails clientDetails = service
 				.loadClientByClientId("clientIdWithSingleDetails");
@@ -129,13 +129,13 @@ public class JdbcClientDetailsServiceTests {
 	public void testLoadingClientIdWithSingleDetailsInCustomTable() {
 		jdbcTemplate.update(CUSTOM_INSERT_SQL, "clientIdWithSingleDetails",
 				"mySecret", "myResource", "myScope", "myAuthorizedGrantType",
-				"myRedirectUri", "myAuthority");
+				"myRedirectUri", "myAuthority", 100, "none");
 
 		JdbcClientDetailsService customService = new JdbcClientDetailsService(
 				db);
 		customService
 				.setSelectClientDetailsSql("select appId, appSecret, resourceIds, scope, "
-						+ "grantTypes, redirectUrl, authorities, access_token_validity, refresh_token_validity, additionalInformation, autoApproveScopes from ClientDetails where appId = ?");
+						+ "grantTypes, redirectUrl, authorities, access_token_validity, refresh_token_validity, auth_code_validity, additionalInformation, autoApproveScopes, token_endpoint_auth_method from ClientDetails where appId = ?");
 
 		ClientDetails clientDetails = customService
 				.loadClientByClientId("clientIdWithSingleDetails");
@@ -165,7 +165,7 @@ public class JdbcClientDetailsServiceTests {
 				"mySecret", "myResource1,myResource2", "myScope1,myScope2",
 				"myAuthorizedGrantType1,myAuthorizedGrantType2",
 				"myRedirectUri1,myRedirectUri2", "myAuthority1,myAuthority2",
-				100, 200, "read,write");
+				100, 200, 100, "read,write", "client_secret_basic");
 
 		ClientDetails clientDetails = service
 				.loadClientByClientId("clientIdWithMultipleDetails");

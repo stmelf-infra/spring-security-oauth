@@ -82,7 +82,8 @@ public class TokenEndpointTests {
 	private TokenRequest createFromParameters(Map<String, String> parameters) {
 		TokenRequest request = new TokenRequest(parameters, parameters.get(OAuth2Utils.CLIENT_ID),
 				OAuth2Utils.parseParameterList(parameters.get(OAuth2Utils.SCOPE)),
-				parameters.get(OAuth2Utils.GRANT_TYPE));
+				parameters.get(OAuth2Utils.GRANT_TYPE),
+				parameters.get(OAuth2Utils.CODE_VERIFIER));
 		return request;
 	}
 
