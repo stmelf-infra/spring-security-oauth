@@ -18,7 +18,10 @@ package org.springframework.security.oauth2.provider.client;
 
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.OAuth2RequestFactory;
 import org.springframework.security.oauth2.provider.TokenRequest;
 import org.springframework.security.oauth2.provider.token.AbstractTokenGranter;
@@ -31,7 +34,6 @@ import org.springframework.security.oauth2.provider.token.AuthorizationServerTok
 public class ClientCredentialsTokenGranter extends AbstractTokenGranter {
 
 	private static final String GRANT_TYPE = "client_credentials";
-	private boolean allowRefresh = false;
 
 	public ClientCredentialsTokenGranter(AuthorizationServerTokenServices tokenServices,
 			ClientDetailsService clientDetailsService, OAuth2RequestFactory requestFactory) {
@@ -43,22 +45,20 @@ public class ClientCredentialsTokenGranter extends AbstractTokenGranter {
 		super(tokenServices, clientDetailsService, requestFactory, grantType);
 	}
 	
-	public void setAllowRefresh(boolean allowRefresh) {
-		this.allowRefresh = allowRefresh;
-	}
-
 	@Override
 	public OAuth2AccessToken grant(String grantType, TokenRequest tokenRequest) {
 		OAuth2AccessToken token = super.grant(grantType, tokenRequest);
 		if (token != null) {
 			DefaultOAuth2AccessToken norefresh = new DefaultOAuth2AccessToken(token);
-			// The spec says that client credentials should not be allowed to get a refresh token
-			if (!allowRefresh) {
-				norefresh.setRefreshToken(null);
-			}
+			norefresh.setRefreshToken(null);
 			token = norefresh;
 		}
 		return token;
 	}
 
+	@Override
+	protected OAuth2Authentication getOAuth2Authentication(ClientDetails client, TokenRequest tokenRequest) {
+		OAuth2Request storedOAuth2Request = getRequestFactory().createOAuth2Request(client, tokenRequest);
+		return new OAuth2ClientAuthentication(storedOAuth2Request, client);
+	}
 }
