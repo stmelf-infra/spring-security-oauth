@@ -21,6 +21,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.security.jwt.crypto.sign.SignatureVerifier;
@@ -48,6 +49,7 @@ import static org.powermock.api.mockito.PowerMockito.spy;
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(JwkTokenStore.class)
+@PowerMockIgnore({"javax.crypto.*" })
 public class JwkTokenStoreTests {
 	private JwkTokenStore jwkTokenStore = new JwkTokenStore("https://identity.server1.io/token_keys");
 
